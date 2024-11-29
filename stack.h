@@ -7,4 +7,7 @@ struct stack {
         int size;
 };
 
+struct stack *stack_ctor(const int capacity);
+void stack_dtor(struct stack *stk);
+
 #endif
