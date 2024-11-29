@@ -25,6 +25,9 @@ void stack_dtor(struct stack *stk)
 
 void stack_push(struct stack *stk, void *elm)
 {
+        if (!stk || !stk->data)
+                return;
+
         if (stk->size >= stk->capacity) {
                 const int expand_val = 2;
                 stack_realloc(stk, stk->capacity * expand_val);
@@ -38,6 +41,9 @@ void stack_push(struct stack *stk, void *elm)
 
 void stack_pop(struct stack *stk, void *elm)
 {
+        if (!stk || !stk->data)
+                return;
+
         const int shrink_lim = 4;
         if (stk->size <= stk->capacity/shrink_lim) {
                 const int shrink_val = 2;
@@ -55,6 +61,9 @@ void stack_pop(struct stack *stk, void *elm)
 
 static void stack_realloc(struct stack *stk, const int capacity)
 {
+        if (!stk || !stk->data)
+                return;
+
         stk->data = realloc(stk->data, capacity * sizeof(stk->elm_size));
         if (!stk->data) {
                 fprintf(stderr, "error: couldn't allocate memory\n");
