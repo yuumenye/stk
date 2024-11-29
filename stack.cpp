@@ -23,6 +23,18 @@ void stack_dtor(struct stack *stk)
 
 void stack_push(struct stack *stk, void *elm)
 {
-        memcpy((char *) stk->data + stk->size * stk->elm_size, (char *) elm, stk->elm_size);
+        memcpy((char *) stk->data + stk->size * stk->elm_size, (char *) elm,
+                        stk->elm_size);
         ++stk->size;
+}
+
+void stack_pop(struct stack *stk, void *elm)
+{
+        memcpy((char *) elm, (char *) stk->data + stk->size * stk->elm_size,
+                        stk->elm_size);
+
+        for (int i = 0; i < stk->elm_size; ++i)
+                *((char *) stk->data + i * stk->elm_size) = 0;
+
+        --stk->size;
 }
