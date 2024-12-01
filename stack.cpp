@@ -3,7 +3,10 @@
 #include <string.h>
 #include "stack.h"
 
-static void stack_realloc(struct stack *stk, const int capacity);
+static int stack_realloc(struct stack *stk, const int capacity);
+static int stack_grow(struct stack *stk);
+static int stack_shrink(struct stack *stk);
+static void stack_init_to_zero(struct stack *stk);
 
 void stack_ctor(struct stack *stk, const int capacity, const size_t elm_size)
 { 
@@ -25,13 +28,11 @@ void stack_dtor(struct stack *stk)
 
 void stack_push(struct stack *stk, void *elm)
 {
-        if (!stk || !stk->data)
+        if (!stk->data)
                 return;
 
-        if (stk->size >= stk->capacity) {
-                const int expand_val = 2;
-                stack_realloc(stk, stk->capacity * expand_val);
-        }
+        if (stack_grow(stk) < 0)
+                return;
 
         memcpy((char *) stk->data + stk->size * stk->elm_size, (char *) elm,
                         stk->elm_size);
@@ -39,34 +40,61 @@ void stack_push(struct stack *stk, void *elm)
         ++stk->size;
 }
 
+static int stack_grow(struct stack *stk)
+{
+        if (stk->size >= stk->capacity) {
+                const int grow_val = 2;
+                if (stack_realloc(stk, stk->capacity * grow_val) < 0)
+                        return -1;
+                stack_init_to_zero(stk);
+        }
+        return 0;
+}
+
 void stack_pop(struct stack *stk, void *elm)
 {
-        if (!stk || !stk->data)
+        if (!stk->data)
                 return;
 
-        const int shrink_lim = 4;
-        if (stk->size <= stk->capacity/shrink_lim) {
-                const int shrink_val = 2;
-                stack_realloc(stk, stk->capacity/shrink_lim);
-        }
+        if (stack_shrink(stk) < 0)
+                return;
 
         memcpy((char *) elm, (char *) stk->data + stk->size * stk->elm_size,
                         stk->elm_size);
 
-        for (int i = 0; i < stk->elm_size; ++i)
-                *((char *) stk->data + i * stk->elm_size) = 0;
-
         --stk->size;
+
+        stack_init_to_zero(stk);
 }
 
-static void stack_realloc(struct stack *stk, const int capacity)
+static void stack_init_to_zero(struct stack *stk)
 {
-        if (!stk || !stk->data)
-                return;
+        for (int i = stk->size * stk->elm_size;
+                        i < stk->capacity * stk->elm_size; ++i)
+                *((char *) stk->data + i) = 0;
+}
+
+static int stack_shrink(struct stack *stk)
+{
+        const int shrink_lim = 4;
+        if (stk->size <= stk->capacity/shrink_lim) {
+                const int shrink_val = 2;
+                if (stack_realloc(stk, stk->capacity/shrink_lim) < 0)
+                        return -1;
+                stack_init_to_zero(stk);
+        }
+        return 0;
+}
+
+static int stack_realloc(struct stack *stk, const int capacity)
+{
+        if (!stk->data)
+                return -1;
 
         stk->data = realloc(stk->data, capacity * sizeof(stk->elm_size));
         if (!stk->data) {
                 fprintf(stderr, "error: couldn't allocate memory\n");
                 exit(1);
         }
+        return 0;
 }
