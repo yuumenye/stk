@@ -59,10 +59,10 @@ void stack_pop(struct stack *stk, void *elm)
         if (stack_shrink(stk) < 0)
                 return;
 
+        --stk->size;
+
         memcpy((char *) elm, (char *) stk->data + stk->size * stk->elm_size,
                         stk->elm_size);
-
-        --stk->size;
 
         stack_init_to_zero(stk);
 }
