@@ -96,5 +96,6 @@ static int stack_realloc(struct stack *stk, const int capacity)
                 fprintf(stderr, "error: couldn't allocate memory\n");
                 exit(1);
         }
+        stk->capacity = capacity;
         return 0;
 }
