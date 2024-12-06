@@ -69,9 +69,7 @@ void stack_pop(struct stack *stk, void *elm)
 
 static void stack_init_to_zero(struct stack *stk)
 {
-        for (int i = stk->size * stk->elm_size;
-                        i < stk->capacity * stk->elm_size; ++i)
-                *((char *) stk->data + i) = 0;
+        memset((char *) stk->data + stk->size * stk->elm_size, 0, stk->capacity * stk->elm_size);
 }
 
 static int stack_shrink(struct stack *stk)
